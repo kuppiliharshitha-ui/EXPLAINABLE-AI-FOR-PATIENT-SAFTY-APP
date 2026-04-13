@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeAI — Download</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#f7f5f0;
+  --ink:#111;
+  --ink2:#444;
+  --line:#d9d4c5;
+  --accent:#1a5c3a;
+  --accent2:#c4622d;
+  --surface:#fff;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Playfair Display',serif;
+  --sans:'Syne',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);overflow-x:hidden;}
+
+/* HEADER */
+header{border-bottom:2px solid var(--ink);background:var(--bg);}
+.header-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.brand{font-family:var(--serif);font-size:1.6rem;letter-spacing:-1px;}
+.brand em{color:var(--accent);font-style:normal;}
+.header-links{display:flex;gap:28px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--ink2);}
+.header-links a{color:inherit;text-decoration:none;transition:color .2s;}
+.header-links a:hover{color:var(--accent);}
+
+/* HERO */
+.hero{max-width:1200px;margin:0 auto;padding:80px 40px 60px;display:grid;grid-template-columns:1fr 480px;gap:60px;align-items:center;}
+.hero-tag{font-family:var(--mono);font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:3px;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.hero-tag::before{content:'';display:inline-block;width:24px;height:1px;background:var(--accent);}
+h1{font-family:var(--serif);font-size:clamp(2.8rem,5vw,4.2rem);line-height:1.15;letter-spacing:-1px;margin-bottom:24px;}
+h1 em{color:var(--accent);font-style:italic;}
+.hero-desc{font-size:16px;color:var(--ink2);line-height:1.8;max-width:480px;margin-bottom:36px;}
+
+/* DOWNLOAD BUTTONS */
+.dl-group{display:flex;flex-direction:column;gap:12px;max-width:340px;}
+.dl-btn{display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:4px;text-decoration:none;transition:transform .15s,box-shadow .15s;border:2px solid transparent;}
+.dl-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12);}
+.dl-primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+.dl-primary:hover{background:#222;}
+.dl-secondary{background:var(--surface);color:var(--ink);border-color:var(--ink);}
+.dl-icon{font-size:22px;flex-shrink:0;}
+.dl-meta{display:flex;flex-direction:column;}
+.dl-meta span{font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.6;}
+.dl-meta strong{font-size:15px;font-weight:600;}
+
+/* HERO VISUAL */
+.hero-visual{position:relative;}
+.screen-card{background:var(--surface);border:2px solid var(--ink);border-radius:8px;overflow:hidden;box-shadow:8px 8px 0 var(--ink);}
+.screen-topbar{background:var(--ink);padding:10px 16px;display:flex;align-items:center;gap:8px;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.screen-body{padding:20px;}
+.risk-pill{display:inline-block;background:#fee2e2;color:#b91c1c;padding:4px 12px;border-radius:3px;font-family:var(--mono);font-size:11px;font-weight:500;margin-bottom:14px;}
+.fake-gauge{width:80px;height:80px;border-radius:50%;background:conic-gradient(#ef4444 0% 74%,#e5e7eb 74% 100%);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.fake-gauge span{width:60px;height:60px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:16px;font-weight:700;}
+.fake-bar{height:8px;border-radius:4px;margin-bottom:7px;background:#e5e7eb;}
+.fake-bar.fill-red{background:linear-gradient(90deg,#ef4444,#f97316);}
+.fake-bar.fill-grn{background:linear-gradient(90deg,#10b981,#3b82f6);}
+.badge-float{position:absolute;top:-20px;right:-24px;background:var(--accent);color:#fff;padding:6px 14px;border-radius:3px;font-family:var(--mono);font-size:11px;border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);}
+
+/* STATS BAR */
+.stats-bar{border-top:2px solid var(--ink);border-bottom:1px solid var(--line);}
+.stats-inner{max-width:1200px;margin:0 auto;padding:0 40px;display:grid;grid-template-columns:repeat(4,1fr);}
+.stat{padding:28px 0;border-right:1px solid var(--line);text-align:center;}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:var(--serif);font-size:2.4rem;color:var(--accent);margin-bottom:4px;}
+.stat-l{font-size:12px;color:var(--ink2);letter-spacing:1px;text-transform:uppercase;font-family:var(--mono);}
+
+/* FEATURES */
+.features-section{max-width:1200px;margin:0 auto;padding:72px 40px;}
+.section-label{font-family:var(--mono);font-size:11px;color:var(--accent2);text-transform:uppercase;letter-spacing:3px;margin-bottom:14px;}
+.section-title{font-family:var(--serif);font-size:2.4rem;max-width:560px;line-height:1.25;margin-bottom:50px;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--ink);border:2px solid var(--ink);}
+.feat{background:var(--bg);padding:32px;transition:background .2s;}
+.feat:hover{background:var(--surface);}
+.feat-num{font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:14px;}
+.feat-title{font-family:var(--serif);font-size:1.25rem;margin-bottom:10px;}
+.feat-desc{font-size:13px;color:var(--ink2);line-height:1.7;}
+
+/* HOW IT WORKS */
+.how-section{background:var(--ink);color:#f7f5f0;padding:80px 40px;}
+.how-inner{max-width:1200px;margin:0 auto;}
+.how-section .section-label{color:#7ecba5;}
+.how-section .section-title{color:#f7f5f0;margin-bottom:50px;}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;}
+.step{border-top:1px solid rgba(255,255,255,.15);padding-top:24px;}
+.step-n{font-family:var(--mono);font-size:11px;color:#7ecba5;margin-bottom:12px;}
+.step-t{font-family:var(--serif);font-size:1.1rem;color:#f7f5f0;margin-bottom:8px;}
+.step-d{font-size:13px;color:#9ca3af;line-height:1.7;}
+
+/* PLATFORM SECTION */
+.platform-section{max-width:1200px;margin:0 auto;padding:72px 40px;}
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;}
+.platform-card{border:2px solid var(--ink);border-radius:6px;padding:28px;background:var(--surface);position:relative;overflow:hidden;transition:box-shadow .2s,transform .2s;}
+.platform-card:hover{box-shadow:6px 6px 0 var(--ink);transform:translate(-3px,-3px);}
+.platform-card::after{content:'';position:absolute;bottom:0;right:0;width:80px;height:80px;background:var(--bg);clip-path:polygon(100% 0,100% 100%,0 100%);}
+.platform-icon{font-size:2.4rem;margin-bottom:16px;}
+.platform-name{font-family:var(--serif);font-size:1.3rem;margin-bottom:6px;}
+.platform-desc{font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:20px;}
+.platform-dl{display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;padding:10px 18px;border-radius:4px;font-size:13px;font-weight:600;text-decoration:none;transition:opacity .2s;}
+.platform-dl:hover{opacity:.85;}
+.platform-tag{position:absolute;top:16px;right:16px;background:var(--accent2);color:#fff;font-size:10px;font-family:var(--mono);padding:2px 8px;border-radius:2px;}
+
+/* FOOTER */
+footer{border-top:2px solid var(--ink);background:var(--bg);}
+.footer-inner{max-width:1200px;margin:0 auto;padding:32px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.footer-brand{font-family:var(--serif);font-size:1.2rem;}
+.footer-note{font-size:12px;color:var(--ink2);font-family:var(--mono);max-width:500px;line-height:1.6;}
+.footer-links{display:flex;gap:20px;font-size:12px;color:var(--ink2);}
+.footer-links a{color:inherit;text-decoration:none;}
+.footer-links a:hover{color:var(--accent);}
+
+/* DISCLAIMER */
+.disclaimer{background:#fffbeb;border-top:1px solid #fcd34d;padding:14px 40px;text-align:center;font-size:12px;color:#92400e;font-family:var(--mono);}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;}
+  .hero-visual{display:none;}
+  .stats-inner{grid-template-columns:repeat(2,1fr);}
+  .features-grid{grid-template-columns:1fr;}
+  .steps{grid-template-columns:repeat(2,1fr);}
+  .platform-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">Safe<em>AI</em></div>
+    <nav class="header-links">
+      <a href="#">Features</a>
+      <a href="#">Docs</a>
+      <a href="#">Research</a>
+      <a href="#">Download</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section>
+  <div class="hero">
+    <div>
+      <div class="hero-tag">XAI · Patient Safety · Clinical AI</div>
+      <h1>AI that explains <em>itself</em> to save lives.</h1>
+      <p class="hero-desc">SafeAI analyzes patient vitals, lab results, and medical history to predict health risks — and tells clinicians exactly why, using explainable AI techniques like SHAP.</p>
+      <div class="dl-group">
+        <a href="#download" class="dl-btn dl-primary">
+          <span class="dl-icon">⬇</span>
+          <span class="dl-meta"><span>Get started free</span><strong>Download SafeAI Desktop</strong></span>
+        </a>
+        <a href="dashboard.html" class="dl-btn dl-secondary">
+          <span class="dl-icon">🌐</span>
+          <span class="dl-meta"><span>No install needed</span><strong>Open Web Dashboard</strong></span>
+        </a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="badge-float">HIGH RISK · 74%</div>
+      <div class="screen-card">
+        <div class="screen-topbar">
+          <div class="dot" style="background:#ff5f57;"></div>
+          <div class="dot" style="background:#febc2e;"></div>
+          <div class="dot" style="background:#28c840;"></div>
+          <span style="color:#888;font-size:11px;font-family:'JetBrains Mono',monospace;margin-left:8px;">SafeAI Dashboard</span>
+        </div>
+        <div class="screen-body">
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+            <div class="fake-gauge"><span>74%</span></div>
+            <div>
+              <div class="risk-pill">HIGH RISK</div>
+              <div style="font-size:13px;font-weight:600;">Patient ID: P-0042</div>
+              <div style="font-size:11px;color:#666;margin-top:2px;">3 critical alerts active</div>
+            </div>
+          </div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#888;margin-bottom:8px;">TOP RISK DRIVERS (SHAP)</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11px;"><span>Lactate (mmol/L)</span><span style="color:#ef4444;">+0.22</span></div>
+          <div class="fake-bar fill-red" style="width:100%"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 6px;font-size:11px;"><span>SpO₂ (%)</span><span style="color:#10b981;">−0.18</span></div>
+          <div class="fake-bar fill-grn" style="width:82%"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:8px 0 6px;font-size:11px;"><span>Heart Rate (bpm)</span><span style="color:#ef4444;">+0.15</span></div>
+          <div class="fake-bar fill-red" style="width:68%"></div>
+          <div style="margin-top:14px;background:#fef2f2;border-radius:4px;padding:8px 10px;font-size:11px;color:#b91c1c;">⚠ SpO₂ critically low — possible hypoxia</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-inner">
+    <div class="stat"><div class="stat-n">15</div><div class="stat-l">Clinical features</div></div>
+    <div class="stat"><div class="stat-n">0.89</div><div class="stat-l">AUC-ROC score</div></div>
+    <div class="stat"><div class="stat-n">SHAP</div><div class="stat-l">XAI method</div></div>
+    <div class="stat"><div class="stat-n">Real‑time</div><div class="stat-l">Risk prediction</div></div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="section-label">Core capabilities</div>
+  <div class="section-title">Everything a clinical AI system needs to be trustworthy.</div>
+  <div class="features-grid">
+    <div class="feat">
+      <div class="feat-num">01</div>
+      <div class="feat-title">SHAP Explanations</div>
+      <div class="feat-desc">Every prediction comes with SHAP attribution values showing exactly which clinical features drove the risk score — and by how much.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num">02</div>
+      <div class="feat-title">Real-time Risk Scoring</div>
+      <div class="feat-desc">Analyzes vitals, labs, and medical history to generate live risk scores for sepsis, deterioration, and clinical complications.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num">03</div>
+      <div class="feat-title">Clinical Alerts</div>
+      <div class="feat-desc">Automatically flags abnormal parameters — SpO₂, tachycardia, hypotension, elevated lactate — with severity-graded alerts.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num">04</div>
+      <div class="feat-title">Counterfactual Reasoning</div>
+      <div class="feat-desc">Tells clinicians what would need to change to reduce risk — actionable, plain-language explanations linked to clinical parameters.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num">05</div>
+      <div class="feat-title">Batch Patient Analysis</div>
+      <div class="feat-desc">Upload ward-level patient lists and receive prioritized risk rankings for entire wards — ideal for morning rounds and triage.</div>
+    </div>
+    <div class="feat">
+      <div class="feat-num">06</div>
+      <div class="feat-title">Audit Trail & Compliance</div>
+      <div class="feat-desc">Every prediction is logged with full model transparency — supporting HIPAA-compliant documentation and regulatory audit requirements.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="how-inner">
+    <div class="section-label">How it works</div>
+    <div class="section-title">From raw data to explainable insight in seconds.</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">Step 01</div>
+        <div class="step-t">Ingest patient data</div>
+        <div class="step-d">Enter vitals, lab results, medication count, and clinical history — or connect directly to your EHR system via REST API.</div>
+      </div>
+      <div class="step">
+        <div class="step-n">Step 02</div>
+        <div class="step-t">AI risk prediction</div>
+        <div class="step-d">A Gradient Boosting model trained on clinical data generates a risk probability score for each patient in milliseconds.</div>
+      </div>
+      <div class="step">
+        <div class="step-n">Step 03</div>
+        <div class="step-t">SHAP explanation</div>
+        <div class="step-d">TreeExplainer decomposes the prediction, attributing positive or negative influence to each clinical feature with mathematical precision.</div>
+      </div>
+      <div class="step">
+        <div class="step-n">Step 04</div>
+        <div class="step-t">Clinician action</div>
+        <div class="step-d">Risk alerts, ranked drivers, and counterfactual suggestions are presented to the clinician to support — not replace — their decision.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD SECTION -->
+<section id="download" class="platform-section">
+  <div class="section-label">Download</div>
+  <div class="section-title">Available on every platform your team uses.</div>
+  <div class="platform-grid">
+
+    <div class="platform-card">
+      <div class="platform-tag">Recommended</div>
+      <div class="platform-icon">🖥️</div>
+      <div class="platform-name">Windows Desktop</div>
+      <div class="platform-desc">Full-featured desktop app with offline mode. Works without internet access — ideal for hospital environments with restricted connectivity.</div>
+      <a href="#" class="platform-dl" onclick="return dlClick(this,'Windows')">
+        ⬇ &nbsp; Download .exe &nbsp;—&nbsp; v1.0.0
+      </a>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-icon">🍎</div>
+      <div class="platform-name">macOS</div>
+      <div class="platform-desc">Native macOS application. Apple Silicon (M1/M2) and Intel supported. Notarized and ready for clinical workstations.</div>
+      <a href="#" class="platform-dl" onclick="return dlClick(this,'macOS')">
+        ⬇ &nbsp; Download .dmg &nbsp;—&nbsp; v1.0.0
+      </a>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-icon">🐧</div>
+      <div class="platform-name">Linux / Server</div>
+      <div class="platform-desc">Docker image and pip package available. Deploy on-premise to hospital servers or cloud infrastructure with full API access.</div>
+      <a href="#" class="platform-dl" onclick="return dlClick(this,'Linux')">
+        ⬇ &nbsp; Docker / pip install
+      </a>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-icon">📱</div>
+      <div class="platform-name">iOS</div>
+      <div class="platform-desc">Mobile app for bedside risk review. Optimized for iPad — perfect for ward rounds and rapid triage review at the point of care.</div>
+      <a href="#" class="platform-dl" onclick="return dlClick(this,'iOS')">
+        ↗ &nbsp; App Store
+      </a>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-icon">🤖</div>
+      <div class="platform-name">Android</div>
+      <div class="platform-desc">Available on Google Play. Supports standard Android tablets used in clinical environments including Samsung Galaxy medical series.</div>
+      <a href="#" class="platform-dl" onclick="return dlClick(this,'Android')">
+        ↗ &nbsp; Google Play
+      </a>
+    </div>
+
+    <div class="platform-card">
+      <div class="platform-icon">🌐</div>
+      <div class="platform-name">Web App</div>
+      <div class="platform-desc">Use directly in your browser — no installation required. Works on any device with a modern browser. Best for quick access and demos.</div>
+      <a href="dashboard.html" class="platform-dl">
+        → &nbsp; Open in browser
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<div class="disclaimer">
+  ⚠ &nbsp; SafeAI is a decision support tool only. All clinical decisions must be made by qualified and licensed healthcare professionals. This software does not replace medical expertise.
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">Safe<span style="color:var(--accent);font-style:italic;">AI</span></div>
+    <div class="footer-note">
+      Open-source XAI Patient Safety System · Built with Flask, scikit-learn, and SHAP ·
+      MIT License · For research and clinical decision support use.
+    </div>
+    <div class="footer-links">
+      <a href="#">GitHub</a>
+      <a href="#">Docs</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function dlClick(el, platform){
+  const orig=el.innerHTML;
+  el.innerHTML='✅ &nbsp; Preparing download...';
+  setTimeout(()=>el.innerHTML=orig,2500);
+  return false;
+}
+// Smooth scroll
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const t=document.querySelector(a.getAttribute('href'));
+    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'});}
+  });
+});
+</script>
+</body>
+</html>

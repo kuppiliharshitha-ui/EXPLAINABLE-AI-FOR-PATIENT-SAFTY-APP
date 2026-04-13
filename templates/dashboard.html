@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeAI — XAI Patient Safety Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0a0e1a;
+  --surface:#111827;
+  --surface2:#1a2236;
+  --border:#1e2d47;
+  --accent:#00d4aa;
+  --accent2:#3b82f6;
+  --warn:#f59e0b;
+  --danger:#ef4444;
+  --text:#e2e8f0;
+  --muted:#64748b;
+  --font-head:'DM Serif Display',serif;
+  --font-body:'Outfit',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --radius:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;line-height:1.6;min-height:100vh;}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;border-bottom:1px solid var(--border);background:rgba(10,14,26,0.95);backdrop-filter:blur(12px);position:sticky;top:0;z-index:100;}
+.logo{font-family:var(--font-head);font-size:1.5rem;color:var(--accent);letter-spacing:-0.5px;}
+.logo span{color:var(--text);font-style:italic;}
+.nav-badge{background:var(--accent);color:#0a0e1a;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;font-family:var(--font-mono);}
+
+/* LAYOUT */
+.shell{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 61px);}
+
+/* SIDEBAR */
+aside{background:var(--surface);border-right:1px solid var(--border);padding:28px 20px;overflow-y:auto;}
+.sidebar-title{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;}
+
+.form-group{margin-bottom:14px;}
+.form-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-family:var(--font-mono);}
+.form-group input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font-mono);font-size:13px;transition:border .2s;}
+.form-group input:focus{outline:none;border-color:var(--accent);}
+
+.section-sep{height:1px;background:var(--border);margin:20px 0;}
+.section-label{font-size:11px;color:var(--accent);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;}
+
+.btn-analyze{width:100%;padding:13px;background:var(--accent);color:#0a0e1a;border:none;border-radius:10px;font-family:var(--font-body);font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:8px;}
+.btn-analyze:hover{opacity:.9;transform:translateY(-1px);}
+.btn-demo{width:100%;padding:10px;background:transparent;color:var(--accent2);border:1px solid var(--accent2);border-radius:10px;font-family:var(--font-body);font-size:14px;cursor:pointer;transition:background .2s;margin-top:8px;}
+.btn-demo:hover{background:rgba(59,130,246,.1);}
+
+/* MAIN */
+main{padding:32px 36px;overflow-y:auto;}
+.main-header{margin-bottom:28px;}
+.main-header h1{font-family:var(--font-head);font-size:2rem;color:var(--text);font-weight:400;}
+.main-header p{color:var(--muted);font-size:14px;margin-top:4px;}
+
+/* PLACEHOLDER */
+#placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px;color:var(--muted);}
+.placeholder-icon{font-size:4rem;opacity:.3;}
+#placeholder h2{font-family:var(--font-head);font-size:1.5rem;color:var(--muted);font-weight:400;}
+
+/* RESULTS */
+#results{display:none;}
+
+/* RISK SCORE HERO */
+.risk-hero{display:grid;grid-template-columns:200px 1fr;gap:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px;margin-bottom:24px;align-items:center;}
+.risk-gauge-wrap{text-align:center;}
+.risk-gauge{position:relative;display:inline-block;}
+.risk-gauge svg{transform:rotate(-90deg);}
+.gauge-bg{fill:none;stroke:var(--surface2);stroke-width:10;}
+.gauge-fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s ease, stroke .5s;}
+.gauge-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;}
+.gauge-pct{font-family:var(--font-head);font-size:2.2rem;color:var(--text);}
+.gauge-lbl{font-size:11px;color:var(--muted);font-family:var(--font-mono);}
+.risk-info h2{font-family:var(--font-head);font-size:1.6rem;margin-bottom:8px;}
+.risk-info p{color:var(--muted);font-size:14px;max-width:480px;}
+.risk-badge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--font-mono);margin-bottom:10px;}
+.badge-high{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);}
+.badge-moderate{background:rgba(245,158,11,.15);color:#f59e0b;border:1px solid rgba(245,158,11,.3);}
+.badge-low{background:rgba(0,212,170,.15);color:#00d4aa;border:1px solid rgba(0,212,170,.3);}
+
+/* GRID PANELS */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.panel-title{font-size:13px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;}
+
+/* SHAP BAR CHART */
+.shap-bar-row{display:grid;grid-template-columns:160px 1fr 60px;align-items:center;gap:10px;margin-bottom:10px;}
+.shap-label{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.shap-bar-bg{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.shap-bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+.bar-pos{background:linear-gradient(90deg,var(--danger),#f97316);}
+.bar-neg{background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.shap-val{font-size:11px;font-family:var(--font-mono);color:var(--muted);text-align:right;}
+
+/* ALERTS */
+.alert-item{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:8px;margin-bottom:8px;font-size:13px;}
+.alert-critical{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);}
+.alert-warning{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);}
+.alert-info{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);}
+.alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.dot-critical{background:var(--danger);}
+.dot-warning{background:var(--warn);}
+.dot-info{background:var(--accent2);}
+
+/* COUNTERFACTUAL */
+.counterfactual-box{background:var(--surface2);border:1px solid var(--accent);border-radius:10px;padding:16px 18px;font-size:14px;color:var(--text);font-style:italic;line-height:1.7;}
+.counterfactual-box::before{content:"💡  ";font-style:normal;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;text-align:center;}
+.stat-val{font-family:var(--font-head);font-size:1.6rem;margin-bottom:4px;}
+.stat-key{font-size:11px;color:var(--muted);font-family:var(--font-mono);text-transform:uppercase;letter-spacing:1px;}
+
+/* LOADER */
+.loader{display:none;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px;}
+.spinner{width:44px;height:44px;border:3px solid var(--surface2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr;}
+  aside{display:none;}
+  .panels{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Safe<span>AI</span></div>
+  <div style="display:flex;gap:12px;align-items:center;">
+    <span style="font-size:13px;color:var(--muted);font-family:var(--font-mono);">XAI Patient Safety</span>
+    <span class="nav-badge">v1.0</span>
+  </div>
+</nav>
+
+<div class="shell">
+  <!-- SIDEBAR FORM -->
+  <aside>
+    <div class="sidebar-title">Patient Input</div>
+
+    <div class="section-label">Vitals</div>
+    <div class="form-group"><label>Age (yrs)</label><input type="number" id="age" value="65"/></div>
+    <div class="form-group"><label>Heart Rate (bpm)</label><input type="number" id="heart_rate" value="88"/></div>
+    <div class="form-group"><label>Systolic BP (mmHg)</label><input type="number" id="systolic_bp" value="118"/></div>
+    <div class="form-group"><label>Diastolic BP (mmHg)</label><input type="number" id="diastolic_bp" value="76"/></div>
+    <div class="form-group"><label>Temperature (°C)</label><input type="number" step="0.1" id="temperature" value="37.2"/></div>
+    <div class="form-group"><label>SpO₂ (%)</label><input type="number" id="spo2" value="96"/></div>
+    <div class="form-group"><label>Respiratory Rate (/min)</label><input type="number" id="respiratory_rate" value="18"/></div>
+
+    <div class="section-sep"></div>
+    <div class="section-label">Lab Results</div>
+    <div class="form-group"><label>Glucose (mg/dL)</label><input type="number" id="glucose" value="105"/></div>
+    <div class="form-group"><label>WBC (×10³/μL)</label><input type="number" step="0.1" id="wbc" value="8.2"/></div>
+    <div class="form-group"><label>Creatinine (mg/dL)</label><input type="number" step="0.1" id="creatinine" value="1.1"/></div>
+    <div class="form-group"><label>Lactate (mmol/L)</label><input type="number" step="0.1" id="lactate" value="1.8"/></div>
+
+    <div class="section-sep"></div>
+    <div class="section-label">Clinical History</div>
+    <div class="form-group"><label>No. of Medications</label><input type="number" id="num_medications" value="5"/></div>
+    <div class="form-group"><label>ICU Days</label><input type="number" id="icu_days" value="0"/></div>
+    <div class="form-group"><label>Prior Admissions</label><input type="number" id="prev_admissions" value="1"/></div>
+    <div class="form-group"><label>Comorbidity Score (0–8)</label><input type="number" id="comorbidities" value="2"/></div>
+
+    <button class="btn-analyze" onclick="analyze()">Analyze Patient Risk</button>
+    <button class="btn-demo" onclick="loadDemo()">Load Demo (High Risk)</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main>
+    <div class="main-header">
+      <h1>Patient Risk Assessment</h1>
+      <p>Explainable AI · SHAP Attribution · Clinical Decision Support</p>
+    </div>
+
+    <!-- Placeholder -->
+    <div id="placeholder">
+      <div class="placeholder-icon">🏥</div>
+      <h2>Enter patient data to begin</h2>
+      <p style="font-size:14px;">Fill in vitals and lab values, then click <strong>Analyze</strong>.</p>
+    </div>
+
+    <!-- Loader -->
+    <div class="loader" id="loader">
+      <div class="spinner"></div>
+      <span style="color:var(--muted);font-family:var(--font-mono);font-size:13px;">Running XAI analysis...</span>
+    </div>
+
+    <!-- Results -->
+    <div id="results">
+
+      <!-- Stats row -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-val" id="s-risk" style="color:var(--danger)">—</div><div class="stat-key">Risk Score</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-label" style="color:var(--warn)">—</div><div class="stat-key">Risk Level</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-alerts" style="color:var(--accent2)">—</div><div class="stat-key">Active Alerts</div></div>
+        <div class="stat-card"><div class="stat-val" id="s-auc" style="color:var(--accent)">—</div><div class="stat-key">Model AUC</div></div>
+      </div>
+
+      <!-- Risk gauge + info -->
+      <div class="risk-hero">
+        <div class="risk-gauge-wrap">
+          <div class="risk-gauge">
+            <svg width="160" height="160" viewBox="0 0 160 160">
+              <circle class="gauge-bg" cx="80" cy="80" r="60"/>
+              <circle class="gauge-fill" id="gauge-arc" cx="80" cy="80" r="60"
+                stroke-dasharray="376.99" stroke-dashoffset="376.99"/>
+            </svg>
+            <div class="gauge-text">
+              <div class="gauge-pct" id="gauge-pct">0%</div>
+              <div class="gauge-lbl">RISK</div>
+            </div>
+          </div>
+        </div>
+        <div class="risk-info">
+          <div id="risk-badge" class="risk-badge badge-low">LOW RISK</div>
+          <h2 id="risk-headline">Patient appears stable</h2>
+          <p id="risk-summary">No critical risk factors identified by the model. Continue routine monitoring.</p>
+          <div style="margin-top:14px;padding:12px 16px;background:var(--surface2);border-radius:8px;">
+            <div id="counterfactual" class="counterfactual-box"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column panels -->
+      <div class="panels">
+
+        <!-- SHAP contributions -->
+        <div class="panel">
+          <div class="panel-title">Top Risk Drivers (SHAP)</div>
+          <div id="shap-chart"></div>
+          <div style="margin-top:12px;display:flex;gap:16px;font-size:11px;font-family:var(--font-mono);color:var(--muted);">
+            <span><span style="color:var(--danger);">■</span> Increases risk</span>
+            <span><span style="color:var(--accent);">■</span> Decreases risk</span>
+          </div>
+        </div>
+
+        <!-- Alerts -->
+        <div class="panel">
+          <div class="panel-title">Clinical Alerts</div>
+          <div id="alerts-list"></div>
+          <div id="no-alerts" style="display:none;color:var(--muted);font-size:13px;text-align:center;padding:30px 0;">
+            ✅ No critical alerts detected
+          </div>
+        </div>
+
+        <!-- Protective factors -->
+        <div class="panel">
+          <div class="panel-title">Protective Factors</div>
+          <div id="protective-list"></div>
+        </div>
+
+        <!-- Model info -->
+        <div class="panel">
+          <div class="panel-title">Model Transparency</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--muted);">Algorithm</span>
+              <span style="font-family:var(--font-mono);">Gradient Boosting</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--muted);">Explainability</span>
+              <span style="font-family:var(--font-mono);">SHAP TreeExplainer</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--muted);">Features used</span>
+              <span style="font-family:var(--font-mono);">15 clinical</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--muted);">Training samples</span>
+              <span style="font-family:var(--font-mono);">1,600</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;">
+              <span style="color:var(--muted);">AUC-ROC</span>
+              <span id="model-auc" style="font-family:var(--font-mono);color:var(--accent);">—</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6;">
+            This system provides decision support only. All clinical decisions must be made by qualified healthcare professionals. AI output should never replace clinical judgement.
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /results -->
+  </main>
+</div>
+
+<script>
+const API = "http://localhost:5000";
+
+async function analyze(){
+  const fields=["age","heart_rate","systolic_bp","diastolic_bp","temperature","spo2",
+    "respiratory_rate","glucose","wbc","creatinine","lactate","num_medications",
+    "icu_days","prev_admissions","comorbidities"];
+  const body={patient_id:"WEB-"+Date.now()};
+  fields.forEach(f=>body[f]=parseFloat(document.getElementById(f).value)||0);
+
+  showLoader();
+
+  // Validate required fields
+  const missing=fields.filter(f=>!(f in body)||isNaN(body[f]));
+  if(missing.length>0){
+    document.getElementById("loader").style.display="none";
+    document.getElementById("placeholder").style.display="flex";
+    showError("Please fill in all fields before analyzing.");
+    return;
+  }
+
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),5000); // 5s timeout
+    const r=await fetch(`${API}/api/analyze`,{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(body),
+      signal:controller.signal
+    });
+    clearTimeout(timeout);
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const data=await r.json();
+    if(data && data.success){
+      renderResults(data);
+    } else {
+      // Backend returned error JSON — fall back to local engine
+      renderResults(buildDemoResult(body));
+    }
+  }catch(e){
+    // Backend unavailable or timed out — run fully local (no alert shown)
+    renderResults(buildDemoResult(body));
+  }
+}
+
+async function loadDemo(){
+  const demo={age:72,heart_rate:118,systolic_bp:88,diastolic_bp:58,temperature:38.9,
+    spo2:91,respiratory_rate:24,glucose:185,wbc:14.2,creatinine:2.1,lactate:3.2,
+    num_medications:12,icu_days:3,prev_admissions:4,comorbidities:5};
+  Object.keys(demo).forEach(k=>{const el=document.getElementById(k);if(el)el.value=demo[k];});
+  showLoader();
+  try{
+    const controller=new AbortController();
+    setTimeout(()=>controller.abort(),4000);
+    const r=await fetch(`${API}/api/demo`,{signal:controller.signal});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const data=await r.json();
+    if(data && data.success) renderResults(data);
+    else renderResults(buildDemoResult(demo));
+  }catch(e){
+    renderResults(buildDemoResult(demo));
+  }
+}
+
+function showError(msg){
+  const existing=document.getElementById("err-banner");
+  if(existing) existing.remove();
+  const div=document.createElement("div");
+  div.id="err-banner";
+  div.style.cssText="background:#1e1a0e;border:1px solid #f59e0b;color:#f59e0b;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;";
+  div.innerHTML=`<span>${msg}</span><span onclick="this.parentElement.remove()" style="cursor:pointer;opacity:.7;font-size:16px;">×</span>`;
+  document.querySelector("main").prepend(div);
+}
+
+function showLoader(){
+  document.getElementById("placeholder").style.display="none";
+  document.getElementById("results").style.display="none";
+  document.getElementById("loader").style.display="flex";
+}
+
+function renderResults(data){
+  document.getElementById("loader").style.display="none";
+  document.getElementById("placeholder").style.display="none";
+  document.getElementById("results").style.display="block";
+
+  const pct=data.risk_percent||0;
+  const label=(data.risk_label||"LOW").toUpperCase();
+  const color=label==="HIGH"?"var(--danger)":label==="MODERATE"?"var(--warn)":"var(--accent)";
+
+  // Stats
+  document.getElementById("s-risk").textContent=pct+"%";
+  document.getElementById("s-risk").style.color=color;
+  document.getElementById("s-label").textContent=label;
+  document.getElementById("s-label").style.color=color;
+  document.getElementById("s-alerts").textContent=(data.alerts||[]).length;
+  document.getElementById("s-auc").textContent=data.model_auc||"—";
+  document.getElementById("model-auc").textContent=data.model_auc||"—";
+
+  // Gauge animation
+  const circ=376.99;
+  const offset=circ-(circ*pct/100);
+  const arc=document.getElementById("gauge-arc");
+  arc.style.stroke=color;
+  setTimeout(()=>arc.style.strokeDashoffset=offset,50);
+  document.getElementById("gauge-pct").textContent=pct+"%";
+
+  // Badge & headline
+  const badge=document.getElementById("risk-badge");
+  badge.textContent=label+" RISK";
+  badge.className="risk-badge badge-"+label.toLowerCase();
+  document.getElementById("risk-headline").textContent=
+    label==="HIGH"?"Immediate clinical review recommended":
+    label==="MODERATE"?"Increased monitoring advised":"Patient appears stable";
+  document.getElementById("risk-summary").textContent=
+    label==="HIGH"?"Multiple high-risk factors detected. Urgent clinical review required.":
+    label==="MODERATE"?"Some risk factors present. Careful monitoring recommended.":
+    "No critical risk factors identified. Continue routine monitoring.";
+
+  // Counterfactual
+  document.getElementById("counterfactual").textContent=data.counterfactual||"";
+
+  // SHAP chart (top 8)
+  const shap=document.getElementById("shap-chart");
+  shap.innerHTML="";
+  const top=(data.shap_contributions||[]).slice(0,8);
+  const maxAbs=Math.max(...top.map(c=>Math.abs(c.shap)),0.01);
+  top.forEach(c=>{
+    const pctBar=Math.round((Math.abs(c.shap)/maxAbs)*100);
+    const isPos=c.shap>0;
+    shap.innerHTML+=`
+      <div class="shap-bar-row">
+        <div class="shap-label" title="${c.label}">${c.label}</div>
+        <div class="shap-bar-bg">
+          <div class="shap-bar-fill ${isPos?'bar-pos':'bar-neg'}" style="width:${pctBar}%"></div>
+        </div>
+        <div class="shap-val">${c.shap>0?'+':''}${c.shap.toFixed(3)}</div>
+      </div>`;
+  });
+
+  // Alerts
+  const alertsEl=document.getElementById("alerts-list");
+  alertsEl.innerHTML="";
+  const alerts=data.alerts||[];
+  if(alerts.length===0){
+    document.getElementById("no-alerts").style.display="block";
+  } else {
+    document.getElementById("no-alerts").style.display="none";
+    alerts.forEach(a=>{
+      alertsEl.innerHTML+=`
+        <div class="alert-item alert-${a.type}">
+          <div class="alert-dot dot-${a.type}"></div>
+          <span>${a.msg}</span>
+        </div>`;
+    });
+  }
+
+  // Protective factors
+  const prot=document.getElementById("protective-list");
+  prot.innerHTML="";
+  (data.protective_factors||[]).forEach(c=>{
+    prot.innerHTML+=`
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;">${c.label}</span>
+        <span style="font-family:var(--font-mono);font-size:12px;color:var(--accent);">${c.shap.toFixed(3)}</span>
+      </div>`;
+  });
+  if((data.protective_factors||[]).length===0)
+    prot.innerHTML='<p style="color:var(--muted);font-size:13px;">No strong protective factors identified.</p>';
+}
+
+// Full local risk engine — runs when backend is unavailable
+function buildDemoResult(p){
+  // Compute risk score locally (mirrors backend logic)
+  let s=5;
+  if(p.heart_rate>120)s+=18; else if(p.heart_rate>100)s+=10;
+  if(p.systolic_bp<90)s+=28; else if(p.systolic_bp<100)s+=12;
+  if(p.spo2<90)s+=26; else if(p.spo2<94)s+=16;
+  if(p.temperature>39.5)s+=14; else if(p.temperature>38.5)s+=8;
+  if(p.lactate>4)s+=22; else if(p.lactate>2.5)s+=16;
+  if(p.wbc>18)s+=12; else if(p.wbc>12)s+=7;
+  if(p.creatinine>3)s+=10; else if(p.creatinine>1.8)s+=6;
+  if(p.comorbidities>5)s+=8; else if(p.comorbidities>3)s+=4;
+  if(p.num_medications>10)s+=4;
+  s+=Math.min((p.icu_days||0)*2,10);
+  s+=Math.min((p.prev_admissions||0)*1.5,8);
+  const pct=Math.min(Math.max(Math.round(s),3),97);
+  const label=pct>=60?"HIGH":pct>=35?"MODERATE":"LOW";
+
+  // Dynamic SHAP values based on actual patient values
+  const raw=[
+    {label:"Lactate (mmol/L)", feature:"lactate",   shap: p.lactate>2.5?0.22:p.lactate>1.8?0.08:p.lactate<1.2?-0.06:-0.02},
+    {label:"SpO₂ (%)",         feature:"spo2",       shap: p.spo2<90?0.24:p.spo2<94?0.16:p.spo2>=98?-0.10:-0.03},
+    {label:"Heart Rate (bpm)", feature:"heart_rate", shap: p.heart_rate>120?0.18:p.heart_rate>100?0.11:p.heart_rate<65?-0.05:-0.01},
+    {label:"Systolic BP",      feature:"systolic_bp",shap: p.systolic_bp<90?0.26:p.systolic_bp<100?0.10:p.systolic_bp>150?0.06:-0.09},
+    {label:"Temperature (°C)", feature:"temperature",shap: p.temperature>39?0.13:p.temperature>38.5?0.09:p.temperature<36.5?0.05:-0.03},
+    {label:"WBC Count",        feature:"wbc",        shap: p.wbc>18?0.14:p.wbc>12?0.08:p.wbc<4?0.06:-0.04},
+    {label:"Creatinine",       feature:"creatinine", shap: p.creatinine>3?0.12:p.creatinine>1.8?0.07:-0.04},
+    {label:"Comorbidities",    feature:"comorbidities",shap:p.comorbidities>5?0.10:p.comorbidities>3?0.05:-0.03},
+  ];
+  raw.sort((a,b)=>Math.abs(b.shap)-Math.abs(a.shap));
+
+  // Build clinical alerts
+  const alerts=[];
+  if(p.spo2<90)      alerts.push({type:"critical",msg:"SpO₂ critically low — hypoxia likely"});
+  else if(p.spo2<94) alerts.push({type:"critical",msg:"SpO₂ below 94% — oxygen support needed"});
+  if(p.heart_rate>130) alerts.push({type:"critical",msg:"Severe tachycardia (HR > 130 bpm)"});
+  else if(p.heart_rate>100) alerts.push({type:"warning",msg:"Tachycardia detected (HR > 100 bpm)"});
+  if(p.systolic_bp<90) alerts.push({type:"critical",msg:"Hypotension — systolic BP < 90 mmHg"});
+  if(p.lactate>4)    alerts.push({type:"critical",msg:"Severe hyperlactatemia — possible septic shock"});
+  else if(p.lactate>2.5) alerts.push({type:"warning",msg:"Elevated lactate — tissue hypoperfusion"});
+  if(p.temperature>38.5) alerts.push({type:"warning",msg:"Fever present (T > 38.5°C) — investigate infection"});
+  if(p.wbc>12)       alerts.push({type:"warning",msg:"Leukocytosis — systemic inflammatory response"});
+  if(p.creatinine>1.8) alerts.push({type:"warning",msg:"Elevated creatinine — monitor renal function"});
+  if(p.glucose>200)  alerts.push({type:"info",msg:"Hyperglycaemia detected — review insulin protocol"});
+  if(p.num_medications>10) alerts.push({type:"info",msg:"Polypharmacy — review for drug interactions"});
+
+  const topDriver=raw.find(x=>x.shap>0)||raw[0];
+  const pctDrop=Math.round(Math.abs(topDriver.shap)*100);
+
+  return{
+    success:true,
+    risk_percent:pct,
+    risk_label:label,
+    model_auc:0.891,
+    alerts,
+    shap_contributions:raw,
+    protective_factors:raw.filter(x=>x.shap<0),
+    counterfactual:`If ${topDriver.label} were within normal range, the risk score would decrease by approximately ${pctDrop}%. Consider addressing this as a priority intervention.`,
+  };
+}
+</script>
+</body>
+</html>

@@ -13,6 +13,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 import warnings
+import os
+
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
@@ -65,8 +67,6 @@ FEATURE_COLS = [
     "wbc", "creatinine", "lactate", "num_medications",
     "icu_days", "prev_admissions", "comorbidities"
 ]
-
-FEATURE_LABELS = {f: f.replace("_", " ").title() for f in FEATURE_COLS}
 
 print("⚙ Training model...")
 df_train = generate_training_data(2000)
@@ -127,7 +127,6 @@ def index():
 def dashboard():
     return render_template("dashboard.html")
 
-# Fix for direct HTML access
 @app.route("/dashboard.html")
 def dashboard_html():
     return redirect(url_for("dashboard"))
@@ -157,10 +156,7 @@ def health():
     return jsonify({"status": "OK"})
 
 # ─────────────────────────────────────────────
-# RUN APP
+# RUN APP (FIXED FOR RENDER)
 # ─────────────────────────────────────────────
-import os
-
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=10000)
